@@ -1,20 +1,14 @@
 {
-  "Id": "[Id]",
-  "TriggerKeywords": [
-    "[Trigger Keyword]"
-  ],
-  "Name": "[Name]",
-  "Description": "[Description]",
-  "Author": "[Author Name]",
+  "Id": "09ea2847-929c-440a-aa2c-9b74bcaae88f",
+  "TriggerKeywords": ["volume"],
+  "Name": "OSX Volume Control",
+  "Description": "OSX Volume Control For Wox",
+  "Author": "Wox-launcher",
   "Version": "0.0.1",
   "MinWoxVersion": "2.0.0",
-  "Runtime": "[Runtime]",
-  "Website": "[Website]",
+  "Runtime": "Nodejs",
+  "Website": "https://github.com/Wox-launcher/Wox.Plugin.OSXVolumeControl",
   "Entry": "index.js",
   "Icon": "relative:images/app.png",
-  "SupportedOS": [
-    "windows",
-    "linux",
-    "darwin"
-  ]
+  "SupportedOS": ["darwin"]
 }

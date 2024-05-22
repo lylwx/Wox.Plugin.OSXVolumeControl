@@ -24,6 +24,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@wox-launcher/wox-plugin": "^0.0.63"
+    "@wox-launcher/wox-plugin": "^0.0.63",
+    "systeminformation": "^5.22.9"
   }
 }

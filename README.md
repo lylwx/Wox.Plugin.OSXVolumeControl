@@ -1,3 +1,3 @@
-# Wox.Plugin.Template.Nodejs
+# Wox.Plugin.OSXVolumeControl
 
-Plugin template for nodejs plugin
+Plugin for osx volume control

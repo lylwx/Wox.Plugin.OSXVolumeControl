@@ -11,7 +11,7 @@ export const plugin: Plugin = {
   query: async (ctx: Context, query: Query): Promise<Result[]> => {
     return [
       {
-        Title: "Hello World " + query.Search,
+        Title: query.Search,
         SubTitle: "This is a subtitle",
         Icon: {
           ImageType: "relative",
