@@ -2,6 +2,7 @@ import { Context, Plugin, PluginInitParams, PublicAPI, Query, Result } from "@wo
 import { getOutputDevices, getOutputDeviceVolume, setOutputDeviceVolume } from "macos-audio-devices"
 
 let api: PublicAPI
+const actionVolumeArray = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 
 export const plugin: Plugin = {
   init: async (ctx: Context, initParams: PluginInitParams) => {
@@ -35,7 +36,6 @@ export const plugin: Plugin = {
       })
       .map(device => {
         const isValidAction = !isNaN(parseFloat(action)) || action == "++" || action == "--"
-
         const subTitle =
           query.Search === "" || !isValidAction
             ? device.transportType
@@ -63,27 +63,31 @@ export const plugin: Plugin = {
                       })
                       if (action == "++") {
                         contentArray.forEach(deviceId => {
-                          if (isNaN(Number(deviceId))) return
-                          getOutputDeviceVolume(Number(deviceId)).then(volume => {
+                          const currentDeviceId = Number(deviceId)
+                          if (isNaN(currentDeviceId)) return
+                          getOutputDeviceVolume(currentDeviceId).then(volume => {
                             api.Log(ctx, "Info", `Current volume is ${volume}`)
-                            setOutputDeviceVolume(Number(deviceId), Number(Number(volume) + 0.1))
+                            setOutputDeviceVolume(currentDeviceId, Number(Number(volume) + 0.1))
                             api.Log(ctx, "Info", `Set volume to ${Number(volume) + 0.1}`)
                           })
                         })
                       } else if (action == "--") {
                         contentArray.forEach(deviceId => {
-                          if (isNaN(Number(deviceId))) return
-                          getOutputDeviceVolume(Number(deviceId)).then(volume => {
+                          const currentDeviceId = Number(deviceId)
+                          if (isNaN(currentDeviceId)) return
+                          getOutputDeviceVolume(currentDeviceId).then(volume => {
                             api.Log(ctx, "Info", `Current volume is ${volume}`)
-                            setOutputDeviceVolume(Number(deviceId), Number(Number(volume) - 0.1))
+                            setOutputDeviceVolume(currentDeviceId, Number(Number(volume) - 0.1))
                             api.Log(ctx, "Info", `Set volume to ${Number(volume) - 0.1}`)
                           })
                         })
                       } else if (!isNaN(parseFloat(action))) {
                         contentArray.forEach(deviceId => {
-                          if (isNaN(Number(deviceId))) return
+                          const currentDeviceId = Number(deviceId)
+                          if (isNaN(currentDeviceId)) return
+                          api.Log(ctx, "Info", `Current deviceId is ${currentDeviceId}`)
                           const changeVolume = Math.max(0, Math.min(1, parseFloat(action) / 100))
-                          setOutputDeviceVolume(device.id, changeVolume)
+                          setOutputDeviceVolume(currentDeviceId, changeVolume)
                           api.Log(ctx, "Info", `Set volume to ${changeVolume}`)
                         })
                       }
@@ -91,68 +95,16 @@ export const plugin: Plugin = {
                   }
                 }
               ]
-            : [
-                {
-                  Name: "Set volume to 10%",
+            : device.transportType === "aggregate"
+            ? []
+            : actionVolumeArray.map(volume => {
+                return {
+                  Name: `Set volume to ${volume * 100}%`,
                   Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.1)
-                  }
-                },
-                {
-                  Name: "Set volume to 20%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.2)
-                  }
-                },
-                {
-                  Name: "Set volume to 30%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.3)
-                  }
-                },
-                {
-                  Name: "Set volume to 40%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.4)
-                  }
-                },
-                {
-                  Name: "Set volume to 50%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.5)
-                  }
-                },
-                {
-                  Name: "Set volume to 60%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.6)
-                  }
-                },
-                {
-                  Name: "Set volume to 70%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.7)
-                  }
-                },
-                {
-                  Name: "Set volume to 80%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.8)
-                  }
-                },
-                {
-                  Name: "Set volume to 90%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 0.9)
-                  }
-                },
-                {
-                  Name: "Set volume to 100%",
-                  Action: async () => {
-                    await setOutputDeviceVolume(device.id, 1)
+                    await setOutputDeviceVolume(device.id, volume)
                   }
                 }
-              ]
+              })
         }
       })
   }

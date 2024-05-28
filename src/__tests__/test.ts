@@ -2,7 +2,7 @@ import { getOutputDevices, getOutputDeviceVolume, setOutputDeviceVolume } from "
 import * as console from "node:console"
 test("test", async () => {
   const outputDevices = await getOutputDevices().then(devices => {
-    console.log(devices[0])
+    console.log(devices)
     return devices
   })
   await getOutputDeviceVolume(outputDevices[0].id).then(volume => {
