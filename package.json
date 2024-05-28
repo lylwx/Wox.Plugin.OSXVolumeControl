@@ -1,6 +1,6 @@
 {
   "name": "osx-volume-control",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "build": "pnpm clean && ncc build src/index.ts -o dist && babel dist --out-dir dist && cp -r images dist && cp -r plugin.json dist && cp -r audio-devices dist",
     "package": "pnpm build && cd dist && zip -r ../Wox.Plugin.OSXVolumeControl.wox *.js *.json images audio-devices",
