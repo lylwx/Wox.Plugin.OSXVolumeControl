@@ -13,27 +13,40 @@ export const plugin: Plugin = {
     const outputDevices = await getOutputDevices()
     await api.Log(ctx, "Info", `Found ${outputDevices.length} output devices: ${JSON.stringify(outputDevices)}`)
     const queryArray = query.Search.split(" ")
-    return outputDevices
-      .filter(device => {
-        if (queryArray.length > 0) {
-          const filter = queryArray
+    const filter =
+      queryArray.length > 0
+        ? queryArray
             .filter((_, index) => {
               return index !== queryArray.length - 1
             })
             .reduce((acc, curr) => acc + curr, "")
+        : ""
+    const action = queryArray.length > 1 ? queryArray[queryArray.length - 1] : ""
+    return outputDevices
+      .filter(device => {
+        if (filter !== "") {
           if (filter.startsWith("id:")) {
-            return device.id.toString().includes(filter.slice(3))
+            const contentArray = filter.split(":")
+            return device.id.toString().includes(contentArray[1])
           }
           return device.name.toLowerCase().includes(filter.toLowerCase())
         }
         return true
       })
       .map(device => {
-        const action = queryArray.length > 1 ? queryArray[queryArray.length - 1] : ""
         const isValidAction = !isNaN(parseFloat(action)) || action == "++" || action == "--"
+
+        const subTitle =
+          query.Search === "" || !isValidAction
+            ? device.transportType
+            : action == "++"
+            ? "Add 10% to volume"
+            : action == "--"
+            ? "Subtract 10% from volume"
+            : `Set volume to ${Math.min(parseFloat(action), 100)}%`
         return {
-          Title: device.name,
-          SubTitle: `Device ID: ${device.id}`,
+          Title: `${device.name} 【Device ID: ${device.id})】`,
+          SubTitle: subTitle,
           Icon: {
             ImageType: "relative",
             ImageData: "images/app.png"
@@ -41,25 +54,38 @@ export const plugin: Plugin = {
           Actions: isValidAction
             ? [
                 {
-                  Name: !isNaN(parseFloat(action)) ? `Set volume to ${queryArray[queryArray.length - 1]}` : action == "++" ? "Add 10% to volume" : "Subtract 10% from volume",
+                  Name: subTitle,
                   IsDefault: true,
                   Action: async () => {
                     if (queryArray.length > 1) {
+                      const contentArray = filter.split(":").filter((_, index) => {
+                        return index !== 0
+                      })
                       if (action == "++") {
-                        getOutputDeviceVolume(device.id).then(volume => {
-                          api.Log(ctx, "Info", `Current volume is ${volume}`)
-                          setOutputDeviceVolume(device.id, Number(Number(volume) + 0.1))
-                          api.Log(ctx, "Info", `Set volume to ${Number(volume) + 0.1}`)
+                        contentArray.forEach(deviceId => {
+                          if (isNaN(Number(deviceId))) return
+                          getOutputDeviceVolume(Number(deviceId)).then(volume => {
+                            api.Log(ctx, "Info", `Current volume is ${volume}`)
+                            setOutputDeviceVolume(Number(deviceId), Number(Number(volume) + 0.1))
+                            api.Log(ctx, "Info", `Set volume to ${Number(volume) + 0.1}`)
+                          })
                         })
                       } else if (action == "--") {
-                        getOutputDeviceVolume(device.id).then(volume => {
-                          api.Log(ctx, "Info", `Current volume is ${volume}`)
-                          setOutputDeviceVolume(device.id, Number(Number(volume) - 0.1))
-                          api.Log(ctx, "Info", `Set volume to ${Number(volume) - 0.1}`)
+                        contentArray.forEach(deviceId => {
+                          if (isNaN(Number(deviceId))) return
+                          getOutputDeviceVolume(Number(deviceId)).then(volume => {
+                            api.Log(ctx, "Info", `Current volume is ${volume}`)
+                            setOutputDeviceVolume(Number(deviceId), Number(Number(volume) - 0.1))
+                            api.Log(ctx, "Info", `Set volume to ${Number(volume) - 0.1}`)
+                          })
                         })
                       } else if (!isNaN(parseFloat(action))) {
-                        await setOutputDeviceVolume(device.id, Math.max(0, Math.min(1, parseFloat(action))))
-                        await api.Log(ctx, "Info", `Set volume to ${Math.max(0, Math.min(1, parseFloat(action)))}`)
+                        contentArray.forEach(deviceId => {
+                          if (isNaN(Number(deviceId))) return
+                          const changeVolume = Math.max(0, Math.min(1, parseFloat(action) / 100))
+                          setOutputDeviceVolume(device.id, changeVolume)
+                          api.Log(ctx, "Info", `Set volume to ${changeVolume}`)
+                        })
                       }
                     }
                   }

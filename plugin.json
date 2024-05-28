@@ -4,7 +4,7 @@
   "Name": "OSX Volume Control",
   "Description": "OSX Volume Control For Wox",
   "Author": "lyl",
-  "Version": "0.0.3",
+  "Version": "0.0.4",
   "MinWoxVersion": "2.0.0",
   "Runtime": "Nodejs",
   "Website": "https://github.com/lylwx/Wox.Plugin.OSXVolumeControl",
